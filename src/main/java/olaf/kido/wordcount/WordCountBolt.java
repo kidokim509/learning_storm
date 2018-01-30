@@ -5,6 +5,7 @@ import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Fields;
+import org.apache.storm.tuple.MessageId;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 
@@ -28,7 +29,15 @@ public class WordCountBolt extends BaseRichBolt {
         }
         count++;
         this.counts.put(word, count);
-        this.collector.emit(new Values(word, count));
+        this.collector.emit(tuple, new Values(word, count));
+
+        MessageId mid = tuple.getMessageId();
+        if (mid.hashCode() % 2 == 0) {
+            this.collector.ack(tuple);
+        }
+        else {
+            this.collector.fail(tuple);
+        }
     }
 
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {

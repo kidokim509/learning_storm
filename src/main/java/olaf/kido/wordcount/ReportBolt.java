@@ -10,14 +10,19 @@ import java.util.*;
 
 public class ReportBolt extends BaseRichBolt {
     private HashMap<String, Long> counts = null;
+    private OutputCollector collector;
+
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
         this.counts = new HashMap<String, Long>();
+        this.collector = outputCollector;
     }
 
     public void execute(Tuple tuple) {
         String word = tuple.getStringByField("word");
         Long count = tuple.getLongByField("count");
         this.counts.put(word, count);
+        this.collector.ack(tuple);
+
     }
 
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {

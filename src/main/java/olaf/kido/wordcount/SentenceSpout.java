@@ -26,15 +26,25 @@ public class SentenceSpout extends BaseRichSpout{
     }
 
     public void nextTuple() {
-        this.collector.emit(new Values(sentences[index]));
+        this.collector.emit(new Values(sentences[index % sentences.length]), index);
         index++;
-        if (index >= sentences.length) {
+        /*if (index >= sentences.length) {
             index = 0;
-        }
+        }*/
         Utils.waitForMillis(1);
     }
 
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
         outputFieldsDeclarer.declare(new Fields("sentence"));
+    }
+
+    @Override
+    public void ack(Object msgId) {
+        System.out.println("============================== acked: " + msgId + "(index: " + index + ")");
+    }
+
+    @Override
+    public void fail(Object msgId) {
+        System.out.println("============================== failed: " + msgId + "(index: " + index + ")");
     }
 }
